@@ -5,8 +5,6 @@ import io.miso.core.config.Configurator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -49,17 +47,7 @@ public class DataServer {
         if (instance == null) {
             instance = new DataServer();
 
-            try {
-                config = Configurator.getConfig(DataServerConfig.DataServerConfigImpl.class);
-
-                logger.debug("URL :: %s", config.getUrl());
-                logger.debug("User :: %s", config.getUser());
-                logger.debug("Secret :: %s", config.getSecret());
-            } catch (final IOException | NoSuchMethodException | InvocationTargetException | InstantiationException |
-                           IllegalAccessException e) {
-                logger.fatal("Failed to get config for %s!", DataServerConfig.class.getName());
-                throw new RuntimeException(e);
-            }
+            config = Configurator.getConfig(DataServerConfig.class);
         }
 
         return instance;
