@@ -11,18 +11,23 @@ public class DataOutputHandler extends ByteArrayOutputStream {
         dataOutputStream = new DataOutputStream(this);
     }
 
-    public void writeUnsignedInt(final int i) throws IOException {
-        dataOutputStream.writeInt(i);
+    public void writeLong(final long l) throws IOException {
+        dataOutputStream.writeLong(l);
         flush();
     }
 
-    public void writeUnsignedShort(final short s) throws IOException {
-        dataOutputStream.writeShort(s & 0xFFFF);
+    public void writeUnsignedInt(final long i) throws IOException {
+        dataOutputStream.writeInt((int) i);
         flush();
     }
 
-    public void writeUnsignedByte(final byte b) throws IOException {
-        dataOutputStream.writeByte(b & 0xFF);
+    public void writeUnsignedShort(final int s) throws IOException {
+        dataOutputStream.writeShort((short) s & 0xFFFF);
+        flush();
+    }
+
+    public void writeUnsignedByte(final short b) throws IOException {
+        dataOutputStream.writeByte((byte) b & 0xFF);
         flush();
     }
 
@@ -30,5 +35,4 @@ public class DataOutputHandler extends ByteArrayOutputStream {
         dataOutputStream.writeLong(l);
         flush();
     }
-
 }

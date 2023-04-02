@@ -1,12 +1,12 @@
 package io.miso.exceptions;
 
-public class InvalidSMSMessage extends RuntimeException {
+public class FailedEncryptionException extends RuntimeException {
     /**
      * Constructs a new runtime exception with {@code null} as its
      * detail message.  The cause is not initialized, and may subsequently be
      * initialized by a call to {@link #initCause}.
      */
-    public InvalidSMSMessage() {
+    public FailedEncryptionException() {
         super();
     }
 
@@ -18,7 +18,7 @@ public class InvalidSMSMessage extends RuntimeException {
      * @param message the detail message. The detail message is saved for
      *                later retrieval by the {@link #getMessage()} method.
      */
-    public InvalidSMSMessage(final String message) {
+    public FailedEncryptionException(final String message) {
         super(message);
     }
 
@@ -36,7 +36,7 @@ public class InvalidSMSMessage extends RuntimeException {
      *                unknown.)
      * @since 1.4
      */
-    public InvalidSMSMessage(final String message, final Throwable cause) {
+    public FailedEncryptionException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
@@ -53,7 +53,7 @@ public class InvalidSMSMessage extends RuntimeException {
      *              unknown.)
      * @since 1.4
      */
-    public InvalidSMSMessage(final Throwable cause) {
+    public FailedEncryptionException(final Throwable cause) {
         super(cause);
     }
 }

@@ -2,53 +2,84 @@ package io.miso.sms;
 
 import io.miso.core.OperationCommand;
 import io.miso.core.WorkOperation;
-import io.miso.exceptions.InvalidSMSMessage;
+import io.miso.core.handler.EncryptionHandler;
+import io.miso.core.handler.HMACHandler;
+import io.miso.core.handler.HeaderHandler;
+import io.miso.core.handler.PayloadHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
+import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class RemoteMessageSMSTest {
+    private final byte[] aesKey = {(byte) 0x91, (byte) 0x36, (byte) 0x8D, (byte) 0x38,
+            (byte) 0x7C, (byte) 0xA2, (byte) 0x0F, (byte) 0x1B,
+            (byte) 0x89, (byte) 0xF8, (byte) 0x69, (byte) 0x6D,
+            (byte) 0x4C, (byte) 0x11, (byte) 0x92, (byte) 0x1F};
+    private final byte[] hmacKey = "test_hmac_key".getBytes(); // Replace with your HMAC key
     private WorkOperation workOperation;
 
     @BeforeEach
-    public void setUp() {
-        final OperationCommand operationCommand = OperationCommand.OC_PING;
-        final int clusterId = 12345;
-        final byte[] payload = new byte[]{1, 2, 3, 4, 5};
-        final Instant createdAt = Instant.now();
+    void setUp() {
+        final byte[] payloadMock = new byte[57];
+        Arrays.fill(payloadMock, (byte) 0x1);
         workOperation = WorkOperation.create()
-                .operationCommand(operationCommand)
-                .clusterId(clusterId)
-                .payload(payload)
-                .createdAt(createdAt);
+                .setOperationCommand(OperationCommand.OC_PING)
+                .setClusterId(0x1) // clusterId
+                .setHubId(0x1) // hubId
+                .setDeviceId(0x1) // deviceId
+                .setPayload(payloadMock) // payload
+                .setCreatedAt(Instant.now());
     }
 
     @Test
-    void testMessageCreation() {
+    void testHeaderHandler() {
+        final HeaderHandler headerHandler = new HeaderHandler(workOperation);
+        final byte[] header = headerHandler.handle();
+        assertEquals(18, header.length);
+    }
+
+    @Test
+    void testPayloadHandler() {
+        final PayloadHandler payloadHandler = new PayloadHandler(workOperation);
+        final byte[] payload = payloadHandler.handle();
+        assertEquals(61, payload.length);
+    }
+
+    @Test
+    void testEncryptionHandler() {
+        final byte[] combinedMessage = new byte[18 + 61]; // header + payload
+        Arrays.fill(combinedMessage, (byte) 0x1);
+
+        final EncryptionHandler encryptionHandler = new EncryptionHandler(aesKey);
+        final byte[] encryptedMessage = encryptionHandler.handle(combinedMessage);
+
+        /*
+         * aesKey.length = AES block size (16-block in this case).
+         * AES will pad the message so that it is always a multiple of the block size. In our case, 0 bytes are missing.
+         */
+        final int remainingBytesToPad = aesKey.length - (combinedMessage.length % aesKey.length);
+        assertEquals(combinedMessage.length + remainingBytesToPad +
+                aesKey.length, encryptedMessage.length);
+    }
+
+    @Test
+    void testHMACHandler() {
+        final byte[] encryptedMessage = new byte[18 + 61];
+        Arrays.fill(encryptedMessage, (byte) 0x1);
+        final HMACHandler hmacHandler = new HMACHandler(hmacKey);
+        final byte[] finalMessage = hmacHandler.handle(encryptedMessage);
+        assertEquals(32 + encryptedMessage.length, finalMessage.length);
+    }
+
+    @Test
+    void testMessagePipeline() {
         final RemoteMessageSMS remoteMessageSMS = new RemoteMessageSMS(workOperation);
-        assertNotNull(remoteMessageSMS);
-    }
-
-    @Test
-    void testMessageSize() {
-        final RemoteMessageSMS remoteMessageSMS = new RemoteMessageSMS(workOperation);
-        final int actualSize = remoteMessageSMS.getMessage().length;
-        final int expectedSize = 124; // HMAC(32) + Encrypted Header(18) + Encrypted Payload(74)
-        assertEquals(expectedSize, actualSize);
-    }
-
-    @Test
-    void testInvalidMessageSize() {
-        final byte[] largePayload = new byte[100];
-        final WorkOperation largeWorkOperation = WorkOperation.create()
-                .operationCommand(OperationCommand.OC_PING)
-                .createdAt(Instant.now())
-                .clusterId(12345)
-                .payload(largePayload);
-
-        assertThrows(InvalidSMSMessage.class, () -> new RemoteMessageSMS(largeWorkOperation));
+        final byte[] message = remoteMessageSMS.buildMessage();
+        final int expectedMessageSize = 32 /* HMAC size */ + 96 /* Encrypted header size + encrypted payload size*/;
+        assertEquals(expectedMessageSize, message.length);
     }
 }
