@@ -36,27 +36,39 @@ public class Configurator {
 
         return configClass.cast(Proxy.newProxyInstance(classLoader, new Class<?>[]{configClass}, (proxy, method, args) -> {
             final String methodName = method.getName().toLowerCase();
-            final String methodNameWithGet = methodName.startsWith("get") ? Character.toLowerCase(methodName.charAt(3)) + methodName.substring(4) : methodName;
-            final String methodNameWithoutGet = methodName.startsWith("get") ? methodName.substring(3) : methodName;
+            String methodNameWithGet = methodName;
+            String methodNameWithIs = methodName;
+            String methodNameWithoutPrefix = methodName;
+
+            if (methodName.startsWith("get")) {
+                methodNameWithGet = Character.toLowerCase(methodName.charAt(3)) + methodName.substring(4);
+                methodNameWithoutPrefix = methodName.substring(3);
+            }
+
+            if (methodName.startsWith("is")) {
+                methodNameWithIs = Character.toLowerCase(methodName.charAt(2)) + methodName.substring(3);
+                methodNameWithoutPrefix = methodName.substring(2);
+            }
 
             final String[] possiblePropertyNames = new String[]{
                     methodName,
                     methodNameWithGet,
-                    methodNameWithoutGet
+                    methodNameWithoutPrefix,
+                    methodNameWithIs
             };
 
             for (final String name : possiblePropertyNames) {
                 final String propertyValue = properties.getProperty(name);
 
                 if (propertyValue != null && !propertyValue.isBlank()) {
-                    logger.error("Using property, %s, from config properties with value: %s", name, propertyValue);
+                    logger.debug("Using property, %s, from config properties with value: %s", name, propertyValue);
                     return convertValue(propertyValue, method.getReturnType());
                 }
             }
 
             final DefaultValue defaultValueAnnotation = method.getAnnotation(DefaultValue.class);
             if (defaultValueAnnotation != null) {
-                logger.error("Using default value for key: %s", methodName);
+                logger.debug("Using default value for key: %s", methodName);
                 return convertValue(defaultValueAnnotation.value(), method.getReturnType());
             }
 

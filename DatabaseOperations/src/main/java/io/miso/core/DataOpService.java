@@ -1,10 +1,7 @@
 package io.miso.core;
 
-import io.miso.config.DataOpConfig;
-
 // TODO create a service that is the "main" of DatabaseOperations
 public class DataOpService implements Service {
-    private DataOpConfig config;
 
     public DataOpService() {
     }

@@ -7,6 +7,8 @@ import java.util.Objects;
 public class WorkOperation {
     private OperationCommand operationCommand;
     private Integer clusterId;
+    private Integer hubId;
+    private Integer deviceId;
     private byte[] payload;
     private Instant createdAt;
 
@@ -21,6 +23,11 @@ public class WorkOperation {
         return operationCommand;
     }
 
+    public WorkOperation setOperationCommand(final OperationCommand operationCommand) {
+        this.operationCommand = operationCommand;
+        return this;
+    }
+
     public WorkOperation operationCommand(final OperationCommand operationCommand) {
         this.operationCommand = operationCommand;
         return this;
@@ -30,8 +37,26 @@ public class WorkOperation {
         return clusterId;
     }
 
-    public WorkOperation clusterId(final Integer clusterId) {
+    public WorkOperation setClusterId(final Integer clusterId) {
         this.clusterId = clusterId;
+        return this;
+    }
+
+    public Integer getHubId() {
+        return hubId;
+    }
+
+    public WorkOperation setHubId(final Integer hubId) {
+        this.hubId = hubId;
+        return this;
+    }
+
+    public Integer getDeviceId() {
+        return deviceId;
+    }
+
+    public WorkOperation setDeviceId(final Integer deviceId) {
+        this.deviceId = deviceId;
         return this;
     }
 
@@ -39,7 +64,7 @@ public class WorkOperation {
         return payload;
     }
 
-    public WorkOperation payload(final byte[] payload) {
+    public WorkOperation setPayload(final byte[] payload) {
         this.payload = payload;
         return this;
     }
@@ -48,25 +73,29 @@ public class WorkOperation {
         return createdAt;
     }
 
-    public WorkOperation createdAt(final Instant createdAt) {
+    public WorkOperation setCreatedAt(final Instant createdAt) {
         this.createdAt = createdAt;
         return this;
     }
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         final WorkOperation that = (WorkOperation) o;
-        return operationCommand == that.operationCommand && Objects.equals(clusterId, that.clusterId) &&
-                Arrays.equals(payload, that.payload) &&
-                Objects.equals(createdAt, that.createdAt);
+        return getOperationCommand() == that.getOperationCommand() && Objects.equals(getClusterId(), that.getClusterId())
+                && Objects.equals(getHubId(), that.getHubId()) && Objects.equals(getDeviceId(), that.getDeviceId())
+                && Arrays.equals(getPayload(), that.getPayload()) && Objects.equals(getCreatedAt(), that.getCreatedAt());
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(operationCommand, clusterId, createdAt);
-        result = 31 * result + Arrays.hashCode(payload);
+        int result = Objects.hash(getOperationCommand(), getClusterId(), getHubId(), getDeviceId(), getCreatedAt());
+        result = 31 * result + Arrays.hashCode(getPayload());
         return result;
     }
 
@@ -75,6 +104,8 @@ public class WorkOperation {
         return "WorkOperation{" +
                 "operationCommand=" + operationCommand +
                 ", clusterId=" + clusterId +
+                ", hubId=" + hubId +
+                ", deviceId=" + deviceId +
                 ", payload=" + Arrays.toString(payload) +
                 ", createdAt=" + createdAt +
                 '}';
