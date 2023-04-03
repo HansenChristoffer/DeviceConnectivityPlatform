@@ -32,4 +32,4 @@ As a hobby project and it being very early in its development, I do not want any
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the [https://commonsclause.com/](Commons Clause License Condition V1.0) © Christoffer Hansen 2024.
