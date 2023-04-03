@@ -23,6 +23,7 @@ Note that these are only ideas at this stage, and nothing has been planned or de
 ## Getting Started
 
 The MVP milestone has not been met yet!
+
 ~~If you're interested in trying out the DeviceConnectivityPlatform for your home automation needs, you can start by cloning this repository and following the instructions in the [documentation](documentation.md) provided.~~
 
 ## Contributing
