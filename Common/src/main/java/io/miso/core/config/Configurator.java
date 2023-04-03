@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Proxy;
-import java.util.Properties;
+import java.util.*;
 
 public class Configurator {
     private static final Logger logger = LogManager.getFormatterLogger();
@@ -21,7 +21,7 @@ public class Configurator {
         final String configFileName = configClass.getSimpleName() + ".properties";
         final InputStream inputStream = classLoader.getResourceAsStream(configFileName);
 
-        final Properties properties = new Properties();
+        final Properties properties;
 
         if (inputStream == null) {
             throw new NullPointerException("InputStream is not allowed to be null. Perhaps ClassLoader was unable to " +
@@ -29,41 +29,38 @@ public class Configurator {
         }
 
         try (final InputStreamReader reader = new InputStreamReader(inputStream)) {
-            properties.load(reader);
+            properties = loadPropertiesCaseInsensitive(reader);
         } catch (final IOException e) {
             throw new ConfigPropertyException("Error loading properties file: " + configFileName, e);
         }
 
         return configClass.cast(Proxy.newProxyInstance(classLoader, new Class<?>[]{configClass}, (proxy, method, args) -> {
             final String methodName = method.getName().toLowerCase();
-            String methodNameWithGet = methodName;
-            String methodNameWithIs = methodName;
-            String methodNameWithoutPrefix = methodName;
 
-            if (methodName.startsWith("get")) {
-                methodNameWithGet = Character.toLowerCase(methodName.charAt(3)) + methodName.substring(4);
-                methodNameWithoutPrefix = methodName.substring(3);
-            }
+            // Extract the base name without "get" or "is" prefix
+            final String baseName = methodName.replaceFirst("^(get|is)", "");
+            final String baseNameWithFirstCharLower = Character.toLowerCase(baseName.charAt(0)) + baseName.substring(1);
 
-            if (methodName.startsWith("is")) {
-                methodNameWithIs = Character.toLowerCase(methodName.charAt(2)) + methodName.substring(3);
-                methodNameWithoutPrefix = methodName.substring(2);
-            }
-
-            final String[] possiblePropertyNames = new String[]{
+            // Generate possible property names
+            final List<String> possiblePropertyNames = Arrays.asList(
                     methodName,
-                    methodNameWithGet,
-                    methodNameWithoutPrefix,
-                    methodNameWithIs
-            };
+                    "get" + baseName,
+                    baseNameWithFirstCharLower,
+                    "is" + baseName
+            );
 
-            for (final String name : possiblePropertyNames) {
-                final String propertyValue = properties.getProperty(name);
+            // Find the property value and index from the properties
+            final Optional<AbstractMap.SimpleEntry<String, String>> propertyEntryOpt = possiblePropertyNames.stream()
+                    .map(name -> new AbstractMap.SimpleEntry<>(name, properties.getProperty(name)))
+                    .filter(entry -> Objects.nonNull(entry.getValue()) && !entry.getValue().isBlank())
+                    .findFirst();
 
-                if (propertyValue != null && !propertyValue.isBlank()) {
-                    logger.debug("Using property, %s, from config properties with value: %s", name, propertyValue);
-                    return convertValue(propertyValue, method.getReturnType());
-                }
+            if (propertyEntryOpt.isPresent()) {
+                final Map.Entry<String, String> propertyEntry = propertyEntryOpt.get();
+                final String propertyName = propertyEntry.getKey();
+                final String propertyValue = propertyEntry.getValue();
+                logger.debug("Using property, %s, from config properties with value: %s", propertyName, propertyValue);
+                return convertValue(propertyValue, method.getReturnType());
             }
 
             final DefaultValue defaultValueAnnotation = method.getAnnotation(DefaultValue.class);
@@ -89,4 +86,18 @@ public class Configurator {
             throw new IllegalArgumentException("Unsupported return type: " + returnType);
         }
     }
+
+    private static Properties loadPropertiesCaseInsensitive(final InputStreamReader inputStreamReader) throws IOException {
+        final Properties properties = new Properties();
+        final Properties caseInsensitiveProperties = new Properties();
+        properties.load(inputStreamReader);
+
+        for (final String key : properties.stringPropertyNames()) {
+            caseInsensitiveProperties.setProperty(key.toLowerCase(), properties.getProperty(key));
+        }
+
+        return caseInsensitiveProperties;
+    }
+
 }
+
