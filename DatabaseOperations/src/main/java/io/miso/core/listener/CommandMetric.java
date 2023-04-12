@@ -4,6 +4,7 @@ import com.mongodb.event.CommandFailedEvent;
 import com.mongodb.event.CommandListener;
 import com.mongodb.event.CommandSucceededEvent;
 import io.miso.util.CloseableReentrantLock;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -100,7 +101,7 @@ public class CommandMetric implements CommandListener, Closeable {
                     }
 
                     if (!sb.isEmpty() && logger.isInfoEnabled()) {
-                        logger.info("MongoDB Command metrics -> %n%s", sb.toString());
+                        logger.printf(Level.INFO, "MongoDB Command metrics -> %n%s", sb.toString());
                     }
                 }
                 try {

@@ -1,6 +1,6 @@
 package io.miso.sms;
 
-import io.miso.core.OperationCommand;
+import io.miso.core.OutboundCommand;
 import io.miso.core.WorkOperation;
 import io.miso.core.handler.EncryptionHandler;
 import io.miso.core.handler.HMACHandler;
@@ -27,7 +27,7 @@ class RemoteMessageSMSTest {
         final byte[] payloadMock = new byte[57];
         Arrays.fill(payloadMock, (byte) 0x1);
         workOperation = WorkOperation.create()
-                .setOperationCommand(OperationCommand.OC_PING)
+                .setOperationCommand(OutboundCommand.OC_PING)
                 .setClusterId(0x1) // clusterId
                 .setHubId(0x1) // hubId
                 .setDeviceId(0x1) // deviceId

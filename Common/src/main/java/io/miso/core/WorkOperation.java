@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class WorkOperation {
-    private OperationCommand operationCommand;
+    private OutboundCommand outboundCommand;
     private Integer clusterId;
     private Integer hubId;
     private Integer deviceId;
@@ -19,17 +19,17 @@ public class WorkOperation {
         return new WorkOperation();
     }
 
-    public OperationCommand getOperationCommand() {
-        return operationCommand;
+    public OutboundCommand getOperationCommand() {
+        return outboundCommand;
     }
 
-    public WorkOperation setOperationCommand(final OperationCommand operationCommand) {
-        this.operationCommand = operationCommand;
+    public WorkOperation setOperationCommand(final OutboundCommand outboundCommand) {
+        this.outboundCommand = outboundCommand;
         return this;
     }
 
-    public WorkOperation operationCommand(final OperationCommand operationCommand) {
-        this.operationCommand = operationCommand;
+    public WorkOperation operationCommand(final OutboundCommand outboundCommand) {
+        this.outboundCommand = outboundCommand;
         return this;
     }
 
@@ -102,7 +102,7 @@ public class WorkOperation {
     @Override
     public String toString() {
         return "WorkOperation{" +
-                "operationCommand=" + operationCommand +
+                "operationCommand=" + outboundCommand +
                 ", clusterId=" + clusterId +
                 ", hubId=" + hubId +
                 ", deviceId=" + deviceId +
