@@ -1,12 +1,12 @@
 package io.miso.core.model;
 
-import org.bson.codecs.pojo.annotations.BsonId;
-import org.bson.codecs.pojo.annotations.BsonProperty;
-
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.UUID;
+
+import org.bson.codecs.pojo.annotations.BsonId;
+import org.bson.codecs.pojo.annotations.BsonProperty;
 
 public abstract class BaseModel implements Serializable {
     @BsonId
@@ -49,7 +49,7 @@ public abstract class BaseModel implements Serializable {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof BaseModel baseModel)) {
+        if (!(o instanceof final BaseModel baseModel)) {
             return false;
         }
         return this.internalId.equals(baseModel.internalId) && this.internalRevision.equals(baseModel.internalRevision);

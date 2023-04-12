@@ -1,29 +1,17 @@
 package io.miso.core.config;
 
-import io.miso.exception.ConfigPropertyException;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
-public interface TestConfig {
-    String getStringValue();
-
-    int getIntValue();
-
-    double getDoubleValue();
-
-    boolean isBooleanValue();
-
-    @DefaultValue("default string")
-    String getDefaultStringValue();
-
-    String getMissingValue();
-}
+import io.miso.exception.ConfigPropertyException;
 
 class ConfiguratorTest {
     private static final String PROPERTIES_CONTENT = """
@@ -61,5 +49,20 @@ class ConfiguratorTest {
         assertEquals("default string", config.getDefaultStringValue());
 
         assertThrows(ConfigPropertyException.class, config::getMissingValue);
+    }
+
+    public interface TestConfig {
+        String getStringValue();
+    
+        int getIntValue();
+    
+        double getDoubleValue();
+    
+        boolean isBooleanValue();
+    
+        @DefaultValue("default string")
+        String getDefaultStringValue();
+    
+        String getMissingValue();
     }
 }

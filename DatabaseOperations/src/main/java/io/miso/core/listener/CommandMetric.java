@@ -1,16 +1,18 @@
 package io.miso.core.listener;
 
-import com.mongodb.event.CommandFailedEvent;
-import com.mongodb.event.CommandListener;
-import com.mongodb.event.CommandSucceededEvent;
-import io.miso.util.CloseableReentrantLock;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.mongodb.event.CommandFailedEvent;
+import com.mongodb.event.CommandListener;
+import com.mongodb.event.CommandSucceededEvent;
+
+import io.miso.util.CloseableReentrantLock;
 
 public class CommandMetric implements CommandListener, Closeable {
     private static final Logger logger = LogManager.getFormatterLogger();

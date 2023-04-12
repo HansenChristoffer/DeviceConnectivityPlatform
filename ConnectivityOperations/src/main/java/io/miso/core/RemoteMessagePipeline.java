@@ -1,10 +1,10 @@
 package io.miso.core;
 
+import java.util.EnumMap;
+
 import io.miso.core.handler.PipelineStep;
 import io.miso.core.handler.RemoteMessageHandler;
 import io.miso.exceptions.InvalidSMSMessage;
-
-import java.util.EnumMap;
 
 public class RemoteMessagePipeline {
     private final EnumMap<PipelineStep, RemoteMessageHandler> handlers = new EnumMap<>(PipelineStep.class);
@@ -15,7 +15,7 @@ public class RemoteMessagePipeline {
     }
 
     public RemoteMessagePipeline addHandler(final PipelineStep step, final RemoteMessageHandler handler) {
-        handlers.put(step, handler);
+        this.handlers.put(step, handler);
         return this;
     }
 
@@ -34,14 +34,14 @@ public class RemoteMessagePipeline {
     }
 
     private void validate(final byte[] data) {
-        if (isSMS) {
+        if (this.isSMS) {
             if (data.length > 128) {
                 throw new InvalidSMSMessage(String.format("Exceeds the SMS limits, data is %d long and we only allow 128 " +
                         "because of encryption(s)", data.length));
             }
         } else {
-            // TODO validate non-sms message
+            // TODO: validate non-sms message
+            // TODO: Non-SMS should not be restricted in size. Perhaps also have a flag for commands that is possible in SMS and which are not, to further validate.
         }
     }
 }
-

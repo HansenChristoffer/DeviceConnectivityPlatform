@@ -1,7 +1,5 @@
 package io.miso.core;
 
-public interface Service {
-    void start() throws Exception;
-
+public interface Service extends Runnable {
     void stop();
 }

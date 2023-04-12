@@ -1,10 +1,10 @@
 package io.miso.core.model;
 
-import org.bson.codecs.pojo.annotations.BsonProperty;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
+
+import org.bson.codecs.pojo.annotations.BsonProperty;
 
 public class Cluster extends BaseModel {
     @BsonProperty("cluster_id")
@@ -46,7 +46,7 @@ public class Cluster extends BaseModel {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Cluster cluster)) {
+        if (!(o instanceof final Cluster cluster)) {
             return false;
         }
         if (!super.equals(o)) {

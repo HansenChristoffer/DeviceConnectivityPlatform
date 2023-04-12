@@ -1,14 +1,16 @@
 package io.miso.core;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.bson.conversions.Bson;
+
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+
 import io.miso.core.model.BaseModel;
 import io.miso.core.repository.StorageRepository;
-import org.bson.conversions.Bson;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class StorageManager<T extends BaseModel> implements StorageRepository<T> {
     private final MongoCollection<T> collection;

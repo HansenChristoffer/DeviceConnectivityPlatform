@@ -1,9 +1,9 @@
 package io.miso.core;
 
+import java.util.Objects;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.Objects;
 
 public class DatabaseAliveChecker implements Runnable {
     private static final Logger logger = LogManager.getFormatterLogger();
@@ -20,7 +20,7 @@ public class DatabaseAliveChecker implements Runnable {
     public void run() {
         logger.info("DatabaseChecker will be started now with a interval of %d ms!", waitTime);
 
-        DataServer dataServer = Objects.requireNonNull(DataServer.getInstance(), "DataServer can not be null!");
+        final DataServer dataServer = Objects.requireNonNull(DataServer.getInstance(), "DataServer can not be null!");
 
         while (shouldRun) {
             if (dataServer.isDatabaseAlive()) {
