@@ -59,6 +59,8 @@ public class Configurator {
                 final Map.Entry<String, String> propertyEntry = propertyEntryOpt.get();
                 final String propertyName = propertyEntry.getKey();
                 final String propertyValue = propertyEntry.getValue();
+
+                // TODO: This LogEvent is spamming everytime something accesses data from the interface. Either remove it or do something else!
                 logger.debug("Using property, %s, from config properties with value: %s", propertyName, propertyValue);
                 return convertValue(propertyValue, method.getReturnType());
             }

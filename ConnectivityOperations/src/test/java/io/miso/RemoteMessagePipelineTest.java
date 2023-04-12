@@ -29,6 +29,7 @@ class RemoteMessagePipelineTest {
     @Mock
     RemoteMessageHandler hmacHandler;
 
+    // TODO: This tests old classes / SMS classes.  Add or change this to test the TCP connectivity!
     @Test
     void testValidateValidMessageLength() {
         when(headerHandler.handle()).thenReturn(new byte[10]);
@@ -45,6 +46,7 @@ class RemoteMessagePipelineTest {
         assertDoesNotThrow(pipeline::execute);
     }
 
+    // TODO: This tests old / SMS classes. Add or change this to test the TCP connectivity!
     @Test
     void testValidateInvalidMessageLength() {
         when(headerHandler.handle()).thenReturn(new byte[10]);

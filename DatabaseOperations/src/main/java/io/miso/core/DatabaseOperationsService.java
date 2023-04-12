@@ -1,15 +1,11 @@
 package io.miso.core;
 
-import io.miso.config.DatabaseOperationsServiceConfig;
-import io.miso.core.config.Configurator;
-import io.miso.core.model.Cluster;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.net.ConnectException;
-import java.util.ArrayList;
-import java.util.UUID;
+import io.miso.config.DatabaseOperationsServiceConfig;
+import io.miso.core.config.Configurator;
+import io.miso.exception.ConnectException;
 
 public class DatabaseOperationsService implements Service {
     private static final Logger logger = LogManager.getFormatterLogger();
@@ -27,24 +23,9 @@ public class DatabaseOperationsService implements Service {
         }
     }
 
-    @Override
-    public void start() throws ConnectException {
-        logger.info("%s starting up...", this.getClass().getSimpleName());
-
-        dataServer = DataServer.getInstance();
-
-        if (dataServer.getConnection() == null) {
-            throw new ConnectException("Unable to fetch connection to database!");
-        }
-
-        logger.info("%s is now up and running!", this.getClass().getSimpleName());
-
-        startDatabaseAliveChecker();
-    }
-
     private void startDatabaseAliveChecker() {
         databaseAliveChecker = new DatabaseAliveChecker(waitTime);
-        Thread databaseAliveCheckerThread = new Thread(databaseAliveChecker);
+        final Thread databaseAliveCheckerThread = new Thread(databaseAliveChecker);
         databaseAliveCheckerThread.setName("DatabaseAliveChecker-thread");
 
         databaseAliveCheckerThread.start();
@@ -58,5 +39,20 @@ public class DatabaseOperationsService implements Service {
             this.databaseAliveChecker.stop();
             this.dataServer.close();
         }
+    }
+
+    @Override
+    public void run() {
+        logger.info("%s starting up...", this.getClass().getSimpleName());
+
+        dataServer = DataServer.getInstance();
+
+        if (dataServer.getConnection() == null) {
+            throw new ConnectException("Unable to fetch connection to database!");
+        }
+
+        logger.info("%s is now up and running!", this.getClass().getSimpleName());
+
+        startDatabaseAliveChecker();
     }
 }

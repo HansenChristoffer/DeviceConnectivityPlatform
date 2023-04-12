@@ -14,10 +14,11 @@ public class HeaderHandler implements RemoteMessageHandler {
     @Override
     public byte[] handle() {
         final ByteBuffer headerBuffer = ByteBuffer.allocate(18);
-        headerBuffer.putShort((short) workOperation.getOperationCommand().getId());
-        headerBuffer.putLong(workOperation.getCreatedAt().toEpochMilli());
-        headerBuffer.putInt(workOperation.getClusterId());
-        headerBuffer.putInt(workOperation.getHubId());
+        headerBuffer.putShort((short) this.workOperation.getOperationCommand().getId());
+        headerBuffer.putLong(this.workOperation.getCreatedAt().toEpochMilli());
+        headerBuffer.putInt(this.workOperation.getClusterId());
+        headerBuffer.putInt(this.workOperation.getHubId());
+        // TODO add some kind of numbering, so we can know which ack belongs to what sent message
 
         return headerBuffer.array();
     }

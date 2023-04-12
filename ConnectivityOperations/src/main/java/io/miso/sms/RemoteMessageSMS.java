@@ -1,9 +1,8 @@
 package io.miso.sms;
 
+import io.miso.Message;
 import io.miso.core.RemoteMessagePipeline;
 import io.miso.core.WorkOperation;
-import io.miso.core.config.Configurator;
-import io.miso.core.config.SecretConfig;
 import io.miso.core.handler.*;
 
 /**
@@ -16,21 +15,20 @@ import io.miso.core.handler.*;
  * <p>
  * Total message size: 32 (HMAC) + 18 (Header) + 74 (Payload) = 124 bytes
  */
-public class RemoteMessageSMS {
+public class RemoteMessageSMS implements Message {
     private final WorkOperation workOperation;
-    private final SecretConfig secretConfig;
 
     public RemoteMessageSMS(final WorkOperation workOperation) {
         this.workOperation = workOperation;
-        this.secretConfig = Configurator.getConfig(SecretConfig.class);
     }
 
+    @Override
     public byte[] buildMessage() {
         final RemoteMessagePipeline pipeline = new RemoteMessagePipeline(true)
-                .addHandler(PipelineStep.HEADER, new HeaderHandler(workOperation))
-                .addHandler(PipelineStep.PAYLOAD, new PayloadHandler(workOperation))
-                .addHandler(PipelineStep.ENCRYPTION, new EncryptionHandler(secretConfig.getAES_KEY().getBytes()))
-                .addHandler(PipelineStep.HMAC, new HMACHandler(secretConfig.getHMAC_KEY().getBytes()));
+                .addHandler(PipelineStep.HEADER, new HeaderHandler(this.workOperation))
+                .addHandler(PipelineStep.PAYLOAD, new PayloadHandler(this.workOperation))
+                .addHandler(PipelineStep.ENCRYPTION, new EncryptionHandler())
+                .addHandler(PipelineStep.HMAC, new HMACHandler());
         return pipeline.execute();
     }
 }

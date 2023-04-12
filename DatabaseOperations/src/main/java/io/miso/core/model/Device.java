@@ -1,11 +1,12 @@
 package io.miso.core.model;
 
-import io.miso.device.DeviceType;
+import java.util.Objects;
+import java.util.StringJoiner;
+
 import org.bson.codecs.pojo.annotations.BsonCreator;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
-import java.util.Objects;
-import java.util.StringJoiner;
+import io.miso.device.DeviceType;
 
 public class Device extends BaseModel {
     @BsonProperty("cluster_id")
@@ -64,7 +65,7 @@ public class Device extends BaseModel {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Device device)) {
+        if (!(o instanceof final Device device)) {
             return false;
         }
         if (!super.equals(o)) {

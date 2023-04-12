@@ -1,12 +1,16 @@
 package io.miso.core;
 
-import io.miso.util.CloseableReentrantLock;
+import java.util.Queue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.PriorityQueue;
-import java.util.Queue;
-import java.util.concurrent.*;
+import io.miso.util.CloseableReentrantLock;
 
 // TODO: Either put it in the WorkScheduler or somewhere else to query database for work
 public class WorkScheduler implements Runnable, AutoCloseable {

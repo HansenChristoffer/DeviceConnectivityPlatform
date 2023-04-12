@@ -4,5 +4,9 @@ public enum PipelineStep {
     HEADER,
     PAYLOAD,
     ENCRYPTION,
-    HMAC
+    HMAC,
+    AUTH,
+    MESSAGE,
+    ACK,
+    ANNOUNCER
 }

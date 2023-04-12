@@ -1,6 +1,6 @@
 package io.miso.sms;
 
-import io.miso.core.OperationCommand;
+import io.miso.core.OutboundCommand;
 import io.miso.core.WorkOperation;
 import io.miso.core.handler.EncryptionHandler;
 import io.miso.core.handler.HMACHandler;
@@ -26,8 +26,8 @@ class RemoteMessageSMSTest {
     void setUp() {
         final byte[] payloadMock = new byte[57];
         Arrays.fill(payloadMock, (byte) 0x1);
-        workOperation = WorkOperation.create()
-                .setOperationCommand(OperationCommand.OC_PING)
+        this.workOperation = WorkOperation.create()
+                .setOperationCommand(OutboundCommand.OC_PING)
                 .setClusterId(0x1) // clusterId
                 .setHubId(0x1) // hubId
                 .setDeviceId(0x1) // deviceId
@@ -37,14 +37,14 @@ class RemoteMessageSMSTest {
 
     @Test
     void testHeaderHandler() {
-        final HeaderHandler headerHandler = new HeaderHandler(workOperation);
+        final HeaderHandler headerHandler = new HeaderHandler(this.workOperation);
         final byte[] header = headerHandler.handle();
         assertEquals(18, header.length);
     }
 
     @Test
     void testPayloadHandler() {
-        final PayloadHandler payloadHandler = new PayloadHandler(workOperation);
+        final PayloadHandler payloadHandler = new PayloadHandler(this.workOperation);
         final byte[] payload = payloadHandler.handle();
         assertEquals(61, payload.length);
     }
@@ -54,30 +54,30 @@ class RemoteMessageSMSTest {
         final byte[] combinedMessage = new byte[18 + 61]; // header + payload
         Arrays.fill(combinedMessage, (byte) 0x1);
 
-        final EncryptionHandler encryptionHandler = new EncryptionHandler(aesKey);
+        final EncryptionHandler encryptionHandler = new EncryptionHandler(this.aesKey, 16);
         final byte[] encryptedMessage = encryptionHandler.handle(combinedMessage);
 
         /*
          * aesKey.length = AES block size (16-block in this case).
          * AES will pad the message so that it is always a multiple of the block size. In our case, 0 bytes are missing.
          */
-        final int remainingBytesToPad = aesKey.length - (combinedMessage.length % aesKey.length);
+        final int remainingBytesToPad = this.aesKey.length - (combinedMessage.length % this.aesKey.length);
         assertEquals(combinedMessage.length + remainingBytesToPad +
-                aesKey.length, encryptedMessage.length);
+                this.aesKey.length, encryptedMessage.length);
     }
 
     @Test
     void testHMACHandler() {
         final byte[] encryptedMessage = new byte[18 + 61];
         Arrays.fill(encryptedMessage, (byte) 0x1);
-        final HMACHandler hmacHandler = new HMACHandler(hmacKey);
+        final HMACHandler hmacHandler = new HMACHandler(this.hmacKey);
         final byte[] finalMessage = hmacHandler.handle(encryptedMessage);
         assertEquals(32 + encryptedMessage.length, finalMessage.length);
     }
 
     @Test
     void testMessagePipeline() {
-        final RemoteMessageSMS remoteMessageSMS = new RemoteMessageSMS(workOperation);
+        final RemoteMessageSMS remoteMessageSMS = new RemoteMessageSMS(this.workOperation);
         final byte[] message = remoteMessageSMS.buildMessage();
         final int expectedMessageSize = 32 /* HMAC size */ + 96 /* Encrypted header size + encrypted payload size*/;
         assertEquals(expectedMessageSize, message.length);

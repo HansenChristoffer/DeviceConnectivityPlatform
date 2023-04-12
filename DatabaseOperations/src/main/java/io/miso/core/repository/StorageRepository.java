@@ -1,9 +1,10 @@
 package io.miso.core.repository;
 
-import com.mongodb.client.ClientSession;
+import java.util.List;
+
 import org.bson.conversions.Bson;
 
-import java.util.List;
+import com.mongodb.client.ClientSession;
 
 public interface StorageRepository<T> {
     void insertDocument(final T model);

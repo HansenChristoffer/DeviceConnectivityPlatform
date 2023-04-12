@@ -1,36 +1,44 @@
 package io.miso.core;
 
-import com.mongodb.*;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.connection.SslSettings;
-import io.miso.config.DataServerConfig;
-import io.miso.core.config.Configurator;
-import io.miso.core.listener.CommandMetric;
-import io.miso.util.CloseableReentrantLock;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.bson.Document;
-import org.bson.codecs.configuration.CodecRegistries;
-import org.bson.codecs.pojo.PojoCodecProvider;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.bson.Document;
+import org.bson.codecs.configuration.CodecRegistries;
+import org.bson.codecs.pojo.PojoCodecProvider;
+
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
+import com.mongodb.MongoCredential;
+import com.mongodb.ServerApi;
+import com.mongodb.ServerApiVersion;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.connection.SslSettings;
+
+import io.miso.config.DataServerConfig;
+import io.miso.core.config.Configurator;
+import io.miso.core.listener.CommandMetric;
+import io.miso.util.CloseableReentrantLock;
+
 class DataServer implements Closeable {
     private static final Logger logger = LogManager.getFormatterLogger();
 
     private final List<Closeable> functions = new CopyOnWriteArrayList<>();
     private final DataServerConfig config;
+    private final String database;
 
     private MongoClient mongoClient;
 
     private DataServer() {
-        config = Configurator.getConfig(DataServerConfig.class);
+        this.config = Configurator.getConfig(DataServerConfig.class);
+        this.database = config.getDatabase();
         setupClient();
     }
 
@@ -83,7 +91,7 @@ class DataServer implements Closeable {
 
     public synchronized MongoDatabase getConnection() {
         try (final CloseableReentrantLock lock = new CloseableReentrantLock()) {
-            return mongoClient.getDatabase(config.getDatabase());
+            return mongoClient.getDatabase(database);
         }
     }
 
