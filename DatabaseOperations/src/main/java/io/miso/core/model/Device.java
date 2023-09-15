@@ -1,18 +1,20 @@
 package io.miso.core.model;
 
 import io.miso.device.DeviceType;
+import org.bson.codecs.pojo.annotations.BsonCreator;
+import org.bson.codecs.pojo.annotations.BsonProperty;
 
 import java.util.Objects;
+import java.util.StringJoiner;
 
-public class Device {
-    private String internalId;
-
-    private String internalRevision;
-
+public class Device extends BaseModel {
+    @BsonProperty("cluster_id")
     private long clusterId;
 
+    @BsonProperty("device_id")
     private long deviceId;
 
+    @BsonProperty("device_type")
     private DeviceType deviceType;
 
     public Device() {
@@ -21,53 +23,37 @@ public class Device {
 
     public Device(final String internalId, final String internalRevision, final long clusterId,
                   final long deviceId, final DeviceType deviceType) {
-        this.internalId = internalId;
-        this.internalRevision = internalRevision;
+        super(internalId, internalRevision);
         this.clusterId = clusterId;
         this.deviceId = deviceId;
         this.deviceType = deviceType;
     }
 
-    public String getInternalId() {
-        return internalId;
-    }
-
-    public Device setInternalId(final String internalId) {
-        this.internalId = internalId;
-        return this;
-    }
-
-    public String getInternalRevision() {
-        return internalRevision;
-    }
-
-    public Device setInternalRevision(final String internalRevision) {
-        this.internalRevision = internalRevision;
-        return this;
-    }
-
     public long getClusterId() {
-        return clusterId;
+        return this.clusterId;
     }
 
+    @BsonCreator
     public Device setClusterId(final long clusterId) {
         this.clusterId = clusterId;
         return this;
     }
 
     public long getDeviceId() {
-        return deviceId;
+        return this.deviceId;
     }
 
+    @BsonCreator
     public Device setDeviceId(final long deviceId) {
         this.deviceId = deviceId;
         return this;
     }
 
     public DeviceType getDeviceType() {
-        return deviceType;
+        return this.deviceType;
     }
 
+    @BsonCreator
     public Device setDeviceType(final DeviceType deviceType) {
         this.deviceType = deviceType;
         return this;
@@ -78,29 +64,28 @@ public class Device {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof Device device)) {
             return false;
         }
-        final Device device = (Device) o;
-        return getClusterId() == device.getClusterId() && getDeviceId() == device.getDeviceId()
-                && Objects.equals(getInternalId(), device.getInternalId())
-                && Objects.equals(getInternalRevision(), device.getInternalRevision())
-                && getDeviceType() == device.getDeviceType();
+        if (!super.equals(o)) {
+            return false;
+        }
+        return this.clusterId == device.clusterId
+                && this.deviceId == device.deviceId
+                && this.deviceType == device.deviceType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getInternalId(), getInternalRevision(), getClusterId(), getDeviceId(), getDeviceType());
+        return Objects.hash(super.hashCode(), this.clusterId, this.deviceId, this.deviceType);
     }
 
     @Override
     public String toString() {
-        return "Device{" +
-                "internalId='" + internalId + '\'' +
-                ", internalReversion='" + internalRevision + '\'' +
-                ", clusterId=" + clusterId +
-                ", deviceId=" + deviceId +
-                ", deviceType=" + deviceType +
-                '}';
+        return new StringJoiner(", ", Device.class.getSimpleName() + "[", "]")
+                .add("clusterId=" + this.clusterId)
+                .add("deviceId=" + this.deviceId)
+                .add("deviceType=" + this.deviceType)
+                .toString();
     }
 }
