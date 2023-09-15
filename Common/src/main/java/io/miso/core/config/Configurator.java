@@ -25,7 +25,7 @@ public class Configurator {
 
         if (inputStream == null) {
             throw new NullPointerException("InputStream is not allowed to be null. Perhaps ClassLoader was unable to " +
-                    "find properties file for said config interface?");
+                    "find properties file for said config interface? [" + configFileName + "]");
         }
 
         try (final InputStreamReader reader = new InputStreamReader(inputStream)) {
@@ -76,6 +76,8 @@ public class Configurator {
     private static Object convertValue(final String value, final Class<?> returnType) {
         if (returnType == String.class) {
             return value;
+        } else if (returnType == long.class || returnType == Long.class) {
+            return Long.parseLong(value);
         } else if (returnType == int.class || returnType == Integer.class) {
             return Integer.parseInt(value);
         } else if (returnType == double.class || returnType == Double.class) {

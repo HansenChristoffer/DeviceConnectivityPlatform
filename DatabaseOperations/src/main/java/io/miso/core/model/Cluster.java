@@ -1,15 +1,16 @@
 package io.miso.core.model;
 
+import org.bson.codecs.pojo.annotations.BsonProperty;
+
 import java.util.List;
+import java.util.Objects;
+import java.util.StringJoiner;
 
-public class Cluster {
-
-    private String internalId;
-
-    private String internalRevision;
-
+public class Cluster extends BaseModel {
+    @BsonProperty("cluster_id")
     private long clusterId;
 
+    @BsonProperty("devices")
     private List<Device> devices;
 
     public Cluster() {
@@ -17,32 +18,13 @@ public class Cluster {
     }
 
     public Cluster(final String internalId, final String internalRevision, final long clusterId, final List<Device> devices) {
-        this.internalId = internalId;
-        this.internalRevision = internalRevision;
+        super(internalId, internalRevision);
         this.clusterId = clusterId;
         this.devices = devices;
     }
 
-    public String getInternalId() {
-        return internalId;
-    }
-
-    public Cluster setInternalId(final String internalId) {
-        this.internalId = internalId;
-        return this;
-    }
-
-    public String getInternalRevision() {
-        return internalRevision;
-    }
-
-    public Cluster setInternalRevision(final String internalRevision) {
-        this.internalRevision = internalRevision;
-        return this;
-    }
-
     public long getClusterId() {
-        return clusterId;
+        return this.clusterId;
     }
 
     public Cluster setClusterId(final long clusterId) {
@@ -51,11 +33,38 @@ public class Cluster {
     }
 
     public List<Device> getDevices() {
-        return devices;
+        return this.devices;
     }
 
     public Cluster setDevices(final List<Device> devices) {
         this.devices = devices;
         return this;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Cluster cluster)) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        return this.clusterId == cluster.clusterId && Objects.equals(this.devices, cluster.devices);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), this.clusterId, this.devices);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Cluster.class.getSimpleName() + "[", "]")
+                .add("clusterId=" + this.clusterId)
+                .add("devices=" + this.devices)
+                .toString();
     }
 }

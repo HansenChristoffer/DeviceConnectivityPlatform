@@ -26,8 +26,8 @@ public class CommandMetric implements CommandListener, Closeable {
     @Override
     public void commandSucceeded(final CommandSucceededEvent evt) {
         try (final CloseableReentrantLock lock = new CloseableReentrantLock()) {
-            if (isActivated && !evt.getCommandName().isBlank()) {
-                metrics.put(evt.getCommandName(), metrics.getOrDefault(evt.getCommandName(), 0));
+            if (this.isActivated && !evt.getCommandName().isBlank()) {
+                this.metrics.put(evt.getCommandName(), this.metrics.getOrDefault(evt.getCommandName(), 0) + 1);
             }
         }
     }
@@ -44,7 +44,7 @@ public class CommandMetric implements CommandListener, Closeable {
 
     public void startAnnouncer() {
         try (final CloseableReentrantLock lock = new CloseableReentrantLock()) {
-            if (isActivated && !isAnnouncerRunning) {
+            if (this.isActivated && !this.isAnnouncerRunning) {
                 logger.debug("Starting Metric announcer...");
                 final Thread announcerThread = new Thread(new MetricAnnouncer());
                 announcerThread.start();
@@ -70,9 +70,9 @@ public class CommandMetric implements CommandListener, Closeable {
     @Override
     public void close() throws IOException {
         try (final CloseableReentrantLock lock = new CloseableReentrantLock()) {
-            isActivated = false;
-            metrics.clear();
-            isAnnouncerRunning = false;
+            this.isActivated = false;
+            this.metrics.clear();
+            this.isAnnouncerRunning = false;
         }
     }
 
@@ -90,12 +90,12 @@ public class CommandMetric implements CommandListener, Closeable {
          */
         @Override
         public void run() {
-            while (isActivated) {
+            while (CommandMetric.this.isActivated) {
                 try (final CloseableReentrantLock lock = new CloseableReentrantLock()) {
                     final StringBuilder sb = new StringBuilder();
-                    isAnnouncerRunning = true;
+                    CommandMetric.this.isAnnouncerRunning = true;
 
-                    for (final Map.Entry<String, Integer> e : metrics.entrySet()) {
+                    for (final Map.Entry<String, Integer> e : CommandMetric.this.metrics.entrySet()) {
                         sb.append(String.format("%s:%d%n", e.getKey(), e.getValue()));
                     }
 
@@ -112,7 +112,7 @@ public class CommandMetric implements CommandListener, Closeable {
             }
 
             try (final CloseableReentrantLock lock = new CloseableReentrantLock()) {
-                isAnnouncerRunning = false;
+                CommandMetric.this.isAnnouncerRunning = false;
             }
         }
     }

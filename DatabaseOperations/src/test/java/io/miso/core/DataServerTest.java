@@ -1,8 +1,16 @@
 package io.miso.core;
 
+import com.mongodb.MongoClientSettings;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import io.miso.config.DataServerConfig;
+import io.miso.core.model.Cluster;
+import io.miso.core.model.Device;
+import org.bson.codecs.configuration.CodecRegistries;
+import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.codecs.pojo.PojoCodecProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -12,8 +20,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class DataServerTest {
@@ -22,18 +29,18 @@ class DataServerTest {
 
     @BeforeEach
     public void setUp() throws NoSuchFieldException, IllegalAccessException {
-        mockConfig = Mockito.mock(DataServerConfig.class);
-        dataServer = DataServer.getInstance();
+        this.mockConfig = Mockito.mock(DataServerConfig.class);
+        this.dataServer = DataServer.getInstance();
 
-        final Field configField = dataServer.getClass().getDeclaredField("config");
+        final Field configField = this.dataServer.getClass().getDeclaredField("config");
         configField.setAccessible(true);
-        configField.set(dataServer, mockConfig);
+        configField.set(this.dataServer, this.mockConfig);
     }
 
     @Test
     void testGetInstance() {
         final DataServer dataServer2 = DataServer.getInstance();
-        assertSame(dataServer, dataServer2, "DataServer should be a singleton.");
+        assertSame(this.dataServer, dataServer2, "DataServer should be a singleton.");
     }
 
     @Test
@@ -57,20 +64,58 @@ class DataServerTest {
     }
 
     @Test
+    void testCodec() {
+        final Cluster cluster = (Cluster) new Cluster()
+                .setClusterId(123456L)
+                .setDevices(List.of(new Device()))
+                .setInternalRevision("THIS.IS.INTERNAL.REVISION")
+                .setInternalId("THIS.IS.INTERNAL.ID");
+
+        final MongoDatabase mockDatabase = mock(MongoDatabase.class);
+        final MongoCollection<Cluster> mockCollection = mock(MongoCollection.class);
+
+        final CodecRegistry pojoCodecRegistry = CodecRegistries.fromRegistries(
+                MongoClientSettings.getDefaultCodecRegistry(),
+                CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true).build())
+        );
+
+        when(mockDatabase.getCollection(anyString(), eq(Cluster.class)))
+                .thenReturn(mockCollection);
+        when(mockDatabase.withCodecRegistry(pojoCodecRegistry))
+                .thenReturn(mockDatabase);
+
+        final MongoCollection<Cluster> collection = mockDatabase
+                .withCodecRegistry(pojoCodecRegistry)
+                .getCollection("Clusters", Cluster.class);
+        collection.insertOne(cluster);
+
+        // Verify that the insertOne method was called on the mock collection
+        verify(mockCollection).insertOne(cluster);
+
+        // Mock the FindIterable and its first method
+        final FindIterable<Cluster> mockIterable = mock(FindIterable.class);
+        when(mockIterable.first()).thenReturn(cluster);
+        when(mockCollection.find()).thenReturn(mockIterable);
+
+        final Cluster retrievedCluster = collection.find().first();
+        assertEquals(cluster, retrievedCluster);
+    }
+
+    @Test
     void testClose() throws IOException {
         final Closeable mockFunction1 = Mockito.mock(Closeable.class);
         final Closeable mockFunction2 = Mockito.mock(Closeable.class);
-        when(mockConfig.getDatabase()).thenReturn("mockDatabase");
+        when(this.mockConfig.getDatabase()).thenReturn("mockDatabase");
 
         try {
-            final Field functionsField = dataServer.getClass().getDeclaredField("functions");
+            final Field functionsField = this.dataServer.getClass().getDeclaredField("functions");
             functionsField.setAccessible(true);
-            functionsField.set(dataServer, List.of(mockFunction1, mockFunction2));
+            functionsField.set(this.dataServer, List.of(mockFunction1, mockFunction2));
         } catch (final NoSuchFieldException | IllegalAccessException e) {
             fail("Failed to set the 'functions' field.");
         }
 
-        dataServer.close();
+        this.dataServer.close();
 
         verify(mockFunction1, times(1)).close();
         verify(mockFunction2, times(1)).close();

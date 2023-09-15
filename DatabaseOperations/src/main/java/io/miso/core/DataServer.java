@@ -11,6 +11,9 @@ import io.miso.core.listener.CommandMetric;
 import io.miso.util.CloseableReentrantLock;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bson.Document;
+import org.bson.codecs.configuration.CodecRegistries;
+import org.bson.codecs.pojo.PojoCodecProvider;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -20,9 +23,10 @@ import java.util.concurrent.TimeUnit;
 
 class DataServer implements Closeable {
     private static final Logger logger = LogManager.getFormatterLogger();
-    private static DataServer instance;
-    private final DataServerConfig config;
+
     private final List<Closeable> functions = new CopyOnWriteArrayList<>();
+    private final DataServerConfig config;
+
     private MongoClient mongoClient;
 
     private DataServer() {
@@ -30,14 +34,8 @@ class DataServer implements Closeable {
         setupClient();
     }
 
-    public static DataServer getInstance() {
-        try (final CloseableReentrantLock lock = new CloseableReentrantLock()) {
-            if (instance == null) {
-                instance = new DataServer();
-            }
-        }
-
-        return instance;
+    public static synchronized DataServer getInstance() {
+        return SingletonHelper.INSTANCE;
     }
 
     private void setupClient() {
@@ -52,7 +50,8 @@ class DataServer implements Closeable {
                         .build())
                 .retryReads(config.isRetryRead())
                 .retryWrites(config.isRetryWrite())
-                .credential(MongoCredential.createCredential(config.getUser(), config.getDatabase(), config.getSecret().toCharArray()))
+                .credential(MongoCredential.createCredential(config.getUser(), config.getDatabase(),
+                        config.getSecret().toCharArray()))
                 .applyToConnectionPoolSettings(b -> {
                     b.maxSize(config.getMaxPoolSize());
                     b.maxConnecting(config.getMaxConnecting());
@@ -72,6 +71,8 @@ class DataServer implements Closeable {
                 .applyToSslSettings(s -> s.applySettings(SslSettings.builder()
                         .enabled(config.isSSLEnabled())
                         .build()))
+                .codecRegistry(CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
+                        CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true).build())))
                 .build();
 
         mongoClient = MongoClients.create(settings);
@@ -80,15 +81,25 @@ class DataServer implements Closeable {
         functions.add(mongoClient);
     }
 
-    public MongoDatabase getConnection() {
+    public synchronized MongoDatabase getConnection() {
         try (final CloseableReentrantLock lock = new CloseableReentrantLock()) {
             return mongoClient.getDatabase(config.getDatabase());
         }
     }
 
-    public MongoClient getMongoClient() {
+    public synchronized MongoClient getMongoClient() {
         try (final CloseableReentrantLock lock = new CloseableReentrantLock()) {
             return mongoClient;
+        }
+    }
+
+    public synchronized boolean isDatabaseAlive() {
+        try {
+            final Document ping = new Document("ping", 1);
+            final Document result = getConnection().runCommand(ping);
+            return result.getDouble("ok") == 1.0;
+        } catch (final Exception e) {
+            return false;
         }
     }
 
@@ -117,5 +128,9 @@ class DataServer implements Closeable {
                 }
             }
         }
+    }
+
+    private static class SingletonHelper {
+        private static final DataServer INSTANCE = new DataServer();
     }
 }

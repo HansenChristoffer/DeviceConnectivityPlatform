@@ -6,13 +6,13 @@ public interface DataServerConfig {
     @DefaultValue("mongodb://localhost:27017")
     String getUrl();
 
-    @DefaultValue("bms")
+    @DefaultValue("root")
     String getUser();
 
-    @DefaultValue("123456789z")
+    @DefaultValue("secret")
     String getSecret();
 
-    @DefaultValue("dcp-central")
+    @DefaultValue("dcp_central")
     String getDatabase();
 
     @DefaultValue("true")
@@ -59,5 +59,4 @@ public interface DataServerConfig {
 
     @DefaultValue("false")
     Boolean isSSLEnabled();
-
 }
