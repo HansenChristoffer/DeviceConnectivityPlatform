@@ -1,27 +1,30 @@
 package io.miso.core.model;
 
+import org.bson.codecs.pojo.annotations.BsonProperty;
+
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.UUID;
 
-import org.bson.codecs.pojo.annotations.BsonId;
-import org.bson.codecs.pojo.annotations.BsonProperty;
-
-public abstract class BaseModel implements Serializable {
-    @BsonId
+public abstract class SystemBaseModel implements Serializable {
     @BsonProperty(value = "internal_id")
     private String internalId;
 
     @BsonProperty(value = "internal_revision")
     private String internalRevision;
 
-    BaseModel() {
+    SystemBaseModel() {
         // For de-/serialization
         this.internalId = UUID.randomUUID().toString();
     }
 
-    BaseModel(final String internalId, final String internalRevision) {
+    public SystemBaseModel(final String internalRevision) {
+        this.internalId = UUID.randomUUID().toString();
+        this.internalRevision = internalRevision;
+    }
+
+    SystemBaseModel(final String internalId, final String internalRevision) {
         this.internalId = internalId;
         this.internalRevision = internalRevision;
     }
@@ -30,7 +33,7 @@ public abstract class BaseModel implements Serializable {
         return this.internalId;
     }
 
-    public BaseModel setInternalId(final String internalId) {
+    public SystemBaseModel setInternalId(final String internalId) {
         this.internalId = internalId;
         return this;
     }
@@ -39,7 +42,7 @@ public abstract class BaseModel implements Serializable {
         return this.internalRevision;
     }
 
-    public BaseModel setInternalRevision(final String internalRevision) {
+    public SystemBaseModel setInternalRevision(final String internalRevision) {
         this.internalRevision = internalRevision;
         return this;
     }
@@ -49,10 +52,10 @@ public abstract class BaseModel implements Serializable {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof final BaseModel baseModel)) {
+        if (!(o instanceof final SystemBaseModel systemBaseModel)) {
             return false;
         }
-        return this.internalId.equals(baseModel.internalId) && this.internalRevision.equals(baseModel.internalRevision);
+        return this.internalId.equals(systemBaseModel.internalId) && this.internalRevision.equals(systemBaseModel.internalRevision);
     }
 
     @Override
@@ -62,7 +65,7 @@ public abstract class BaseModel implements Serializable {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", BaseModel.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", SystemBaseModel.class.getSimpleName() + "[", "]")
                 .add("internalId='" + this.internalId + "'")
                 .add("internalRevision='" + this.internalRevision + "'")
                 .toString();

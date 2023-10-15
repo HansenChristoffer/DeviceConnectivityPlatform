@@ -1,5 +1,13 @@
 package io.miso.tcp;
 
+import static io.miso.util.ConditionUtils.isNotNullAndNotEmpty;
+
+import java.net.InetSocketAddress;
+import java.util.Objects;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import io.miso.core.config.Configurator;
 import io.miso.core.config.SecretConfig;
 import io.miso.exceptions.InvalidMessageException;
@@ -9,13 +17,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import java.net.InetSocketAddress;
-import java.util.Objects;
-
-import static io.miso.util.ConditionUtils.isNotNullAndNotEmpty;
 
 // TODO: We want to make sure to encrypt and HMAC calculate all outbound as well. Perhaps extend different or write a wrapper that handles both ways!
 // TODO: Down the line, add DTLS to this handler. This should be added last, just to make testing and development easier for now!
@@ -38,14 +39,14 @@ public class TcpAuthHandler extends ChannelDuplexHandler {
                 msg.getClass().getSimpleName(), this.getClass().getSimpleName()));
 
         try {
-            if (msg instanceof ByteBuf buffer) {
-                if ((isNotNullAndNotEmpty(this.hmacKey)) && (isNotNullAndNotEmpty(this.aesKey))) {
-                    final byte[] encryptedBytes = SecurityUtil.validateHMAC(BufferUtil.getArray(buffer), this.hmacKey);
+            if (msg instanceof final ByteBuf buffer) {
+                if ((isNotNullAndNotEmpty(hmacKey)) && (isNotNullAndNotEmpty(aesKey))) {
+                    final byte[] encryptedBytes = SecurityUtil.validateHMAC(BufferUtil.getArray(buffer), hmacKey);
 
                     Objects.requireNonNull(encryptedBytes, "'encryptedBytes' is not allowed to be null, " +
                             "probably means that the message was invalid!");
 
-                    final byte[] decryptedBytes = SecurityUtil.decrypt(encryptedBytes, this.aesKey);
+                    final byte[] decryptedBytes = SecurityUtil.decrypt(encryptedBytes, aesKey);
                     Objects.requireNonNull(decryptedBytes, "'decryptedBytes' is not allowed to be null, " +
                             "probably means that the message was invalid!");
 

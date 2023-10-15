@@ -1,31 +1,26 @@
 package io.miso.core;
 
+import com.mongodb.*;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.connection.SslSettings;
+import io.miso.config.DataServerConfig;
+import io.miso.core.config.Configurator;
+import io.miso.core.listener.CommandMetric;
+import io.miso.util.CloseableReentrantLock;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.bson.Document;
+import org.bson.codecs.LongCodec;
+import org.bson.codecs.configuration.CodecRegistries;
+import org.bson.codecs.pojo.PojoCodecProvider;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.bson.Document;
-import org.bson.codecs.configuration.CodecRegistries;
-import org.bson.codecs.pojo.PojoCodecProvider;
-
-import com.mongodb.ConnectionString;
-import com.mongodb.MongoClientSettings;
-import com.mongodb.MongoCredential;
-import com.mongodb.ServerApi;
-import com.mongodb.ServerApiVersion;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.connection.SslSettings;
-
-import io.miso.config.DataServerConfig;
-import io.miso.core.config.Configurator;
-import io.miso.core.listener.CommandMetric;
-import io.miso.util.CloseableReentrantLock;
 
 class DataServer implements Closeable {
     private static final Logger logger = LogManager.getFormatterLogger();
@@ -80,6 +75,7 @@ class DataServer implements Closeable {
                         .enabled(config.isSSLEnabled())
                         .build()))
                 .codecRegistry(CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
+                        CodecRegistries.fromCodecs(new LongCodec()),
                         CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true).build())))
                 .build();
 

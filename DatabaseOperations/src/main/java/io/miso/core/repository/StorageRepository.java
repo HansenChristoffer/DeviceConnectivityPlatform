@@ -1,19 +1,20 @@
 package io.miso.core.repository;
 
-import java.util.List;
-
+import com.mongodb.client.ClientSession;
 import org.bson.conversions.Bson;
 
-import com.mongodb.client.ClientSession;
+import java.util.List;
 
 public interface StorageRepository<T> {
-    void insertDocument(final T model);
+    long replaceDocument(final T model);
 
-    void insertDocument(final ClientSession session, final T model);
+    String insertDocument(final T model);
+
+    String insertDocument(final ClientSession session, final T model);
 
     List<T> find(final Bson filter);
 
-    void updateDocument(final Bson filter, final Bson update);
+    long updateDocument(final Bson filter, final Bson update);
 
-    void deleteDocument(final Bson filter);
+    long deleteDocument(final Bson filter);
 }
