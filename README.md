@@ -1,13 +1,13 @@
 # DeviceConnectivityPlatform
 
 The **DeviceConnectivityPlatform** is a personal project created for home automation purposes. It serves as a
-comprehensive backend solution for managing various smart systemDeviceXOS and appliances within your home. The project
+comprehensive backend solution for managing various smart devices and appliances within your home. The project
 is
 currently being developed during free time outside of work commitments.
 
 ## Features
 
-The platform aims to provide reliable and redundant communication capabilities for managing smart systemDeviceXOS
+The platform aims to provide reliable and redundant communication capabilities for managing smart devices
 through
 different means. TCP communication is in the works, and SMS support is planned for the future.
 
@@ -17,16 +17,16 @@ usage.
 
 ## Planned IoT Devices
 
-As the project progresses, I plan to create a variety of IoT systemDeviceXOS that will be compatible with this backend
+As the project progresses, I plan to create a variety of IoT devices that will be compatible with this backend
 system.
-These systemDeviceXOS include:
+These devices include:
 
 - **Logical Device:** The main component of the home automation system, which serves as the logical unit and handles the
-  communication and coordination between the other systemDeviceXOS.
-- **Climate Device:** A systemDeviceXO that uses various sensors to keep track of climate data.
-- **Camera Device:** A systemDeviceXO that allows for taking pictures and streaming video.
-- **Voice Device:** A systemDeviceXO that can project sound files and actual sound over VoIP.
-- **Interface Device:** A systemDeviceXO with an interface, such as a touch screen, that displays data and enables the
+  communication and coordination between the other devices.
+- **Climate Device:** A device that uses various sensors to keep track of climate data.
+- **Camera Device:** A device that allows for taking pictures and streaming video.
+- **VOIP Device:** A device that can project sound files and actual sound over VoIP.
+- **Interface Device:** A device with an interface, such as a touch screen, that displays data and enables the
   user to
   enable/disable various configurations.
 
