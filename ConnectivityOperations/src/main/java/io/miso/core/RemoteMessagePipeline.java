@@ -1,10 +1,10 @@
 package io.miso.core;
 
-import java.util.EnumMap;
-
 import io.miso.core.handler.PipelineStep;
 import io.miso.core.handler.RemoteMessageHandler;
 import io.miso.exceptions.InvalidSMSMessage;
+
+import java.util.EnumMap;
 
 public class RemoteMessagePipeline {
     private final EnumMap<PipelineStep, RemoteMessageHandler> handlers = new EnumMap<>(PipelineStep.class);
@@ -34,7 +34,7 @@ public class RemoteMessagePipeline {
     }
 
     private void validate(final byte[] data) {
-        if (this.isSMS) {
+        if (isSMS) {
             if (data.length > 128) {
                 throw new InvalidSMSMessage(String.format("Exceeds the SMS limits, data is %d long and we only allow 128 " +
                         "because of encryption(s)", data.length));

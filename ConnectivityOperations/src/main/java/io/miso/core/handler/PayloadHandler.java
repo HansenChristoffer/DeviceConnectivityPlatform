@@ -1,8 +1,8 @@
 package io.miso.core.handler;
 
-import io.miso.core.WorkOperation;
-
 import java.nio.ByteBuffer;
+
+import io.miso.core.WorkOperation;
 
 public class PayloadHandler implements RemoteMessageHandler {
     private final WorkOperation workOperation;
@@ -16,7 +16,7 @@ public class PayloadHandler implements RemoteMessageHandler {
         if (workOperation.getDeviceId() != null) {
             final byte[] payloadBytes = workOperation.getPayload();
             final ByteBuffer payloadBuffer = ByteBuffer.allocate(payloadBytes.length + 4); // 4 = integers byte size
-            payloadBuffer.putInt(workOperation.getDeviceId());
+            payloadBuffer.putInt((int) (workOperation.getDeviceId() & 0xFFFF_FFFF));
             payloadBuffer.put(payloadBytes);
 
             return payloadBuffer.array();

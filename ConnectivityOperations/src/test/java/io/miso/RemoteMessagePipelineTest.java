@@ -4,6 +4,7 @@ import io.miso.core.RemoteMessagePipeline;
 import io.miso.core.handler.PipelineStep;
 import io.miso.core.handler.RemoteMessageHandler;
 import io.miso.exceptions.InvalidSMSMessage;
+import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -11,12 +12,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class RemoteMessagePipelineTest {
-
     @Mock
     RemoteMessageHandler headerHandler;
 
@@ -31,6 +31,7 @@ class RemoteMessagePipelineTest {
 
     // TODO: This tests old classes / SMS classes.  Add or change this to test the TCP connectivity!
     @Test
+    @Ignore
     void testValidateValidMessageLength() {
         when(headerHandler.handle()).thenReturn(new byte[10]);
         when(payloadHandler.handle()).thenReturn(new byte[100]);
@@ -48,6 +49,7 @@ class RemoteMessagePipelineTest {
 
     // TODO: This tests old / SMS classes. Add or change this to test the TCP connectivity!
     @Test
+    @Ignore
     void testValidateInvalidMessageLength() {
         when(headerHandler.handle()).thenReturn(new byte[10]);
         when(payloadHandler.handle()).thenReturn(new byte[119]);

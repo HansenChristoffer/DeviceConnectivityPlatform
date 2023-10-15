@@ -1,32 +1,20 @@
 package io.miso.core;
 
-import io.miso.util.BufferUtil;
-import io.netty.buffer.ByteBuf;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
-/*
- * TODO: Make this class non-singleton. Make it so that a new one is created for every incoming connection. Also, use Executors!
- * TODO: Perhaps keep a global object for the connection, fetched from the database? That way it has it easily available.
- */
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import io.miso.util.BufferUtil;
+import io.netty.buffer.ByteBuf;
+
 public class InboundCommandProcessor {
     private static final Logger logger = LogManager.getFormatterLogger();
 
-    private static InboundCommandProcessor instance;
-
-    private InboundCommandProcessor() {
-    }
-
-    public static InboundCommandProcessor getInstance() {
-        if (instance == null) {
-            instance = new InboundCommandProcessor();
-        }
-
-        return instance;
+    public InboundCommandProcessor() {
+        //
     }
 
     @InboundCommandHandler(InboundCommand.IC_PING)
