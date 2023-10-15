@@ -3,7 +3,11 @@ package io.miso.sms;
 import io.miso.Message;
 import io.miso.core.RemoteMessagePipeline;
 import io.miso.core.WorkOperation;
-import io.miso.core.handler.*;
+import io.miso.core.handler.EncryptionHandler;
+import io.miso.core.handler.HMACHandler;
+import io.miso.core.handler.HeaderHandler;
+import io.miso.core.handler.PayloadHandler;
+import io.miso.core.handler.PipelineStep;
 
 /**
  * Remote Message protocol (RM-protocol 0.5) using AES-128 for encryption and HMAC-SHA256 for authentication
@@ -25,11 +29,10 @@ public class RemoteMessageSMS implements Message {
     @Override
     public byte[] buildMessage() {
         final RemoteMessagePipeline pipeline = new RemoteMessagePipeline(true)
-                .addHandler(PipelineStep.HEADER, new HeaderHandler(this.workOperation))
-                .addHandler(PipelineStep.PAYLOAD, new PayloadHandler(this.workOperation))
+                .addHandler(PipelineStep.HEADER, new HeaderHandler(workOperation))
+                .addHandler(PipelineStep.PAYLOAD, new PayloadHandler(workOperation))
                 .addHandler(PipelineStep.ENCRYPTION, new EncryptionHandler())
                 .addHandler(PipelineStep.HMAC, new HMACHandler());
         return pipeline.execute();
     }
 }
-
