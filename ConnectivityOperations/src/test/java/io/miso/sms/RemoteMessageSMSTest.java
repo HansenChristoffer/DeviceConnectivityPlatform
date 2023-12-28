@@ -2,6 +2,7 @@ package io.miso.sms;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Arrays;
 
@@ -20,7 +21,7 @@ class RemoteMessageSMSTest {
             (byte) 0x7C, (byte) 0xA2, (byte) 0x0F, (byte) 0x1B,
             (byte) 0x89, (byte) 0xF8, (byte) 0x69, (byte) 0x6D,
             (byte) 0x4C, (byte) 0x11, (byte) 0x92, (byte) 0x1F};
-    private final byte[] hmacKey = "test_hmac_key".getBytes(); // Replace with your HMAC key
+    private final byte[] hmacKey = "test_hmac_key".getBytes(StandardCharsets.ISO_8859_1); // Replace with your HMAC key
     private WorkOperation workOperation;
 
     @BeforeEach

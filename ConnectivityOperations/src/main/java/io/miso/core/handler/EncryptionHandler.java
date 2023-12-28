@@ -1,5 +1,7 @@
 package io.miso.core.handler;
 
+import java.nio.charset.StandardCharsets;
+
 import io.miso.core.config.Configurator;
 import io.miso.core.config.SecretConfig;
 import io.miso.util.SecureRandomProvider;
@@ -11,7 +13,7 @@ public class EncryptionHandler implements RemoteMessageHandler {
 
     public EncryptionHandler() {
         final SecretConfig secretConfig = Configurator.getConfig(SecretConfig.class);
-        this.aesKey = secretConfig.getAES_KEY().getBytes();
+        this.aesKey = secretConfig.getAES_KEY().getBytes(StandardCharsets.ISO_8859_1);
         this.blockSize = secretConfig.getIV_block_size();
     }
 

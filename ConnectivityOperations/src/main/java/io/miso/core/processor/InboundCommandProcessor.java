@@ -1,21 +1,19 @@
-package io.miso.core;
+package io.miso.core.processor;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.Instant;
 import java.util.Arrays;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import io.miso.core.InboundCommand;
 import io.miso.util.BufferUtil;
 import io.netty.buffer.ByteBuf;
 
 public class InboundCommandProcessor {
     private static final Logger logger = LogManager.getFormatterLogger();
-
-    public InboundCommandProcessor() {
-        //
-    }
 
     @InboundCommandHandler(InboundCommand.IC_PING)
     public void handleInboundPing(final ByteBuf buffer) {
@@ -23,33 +21,37 @@ public class InboundCommandProcessor {
 
         if (buffer != null && buffer.readableBytes() > 0) {
             logger.info("Bytes ::: [%s]", Arrays.toString(BufferUtil.getArray(buffer)));
+
+            final long firstUnsignedInteger = buffer.readUnsignedInt();
+            final long secondUnsignedInteger = buffer.readUnsignedInt();
+            final Instant readInstant = Instant.ofEpochMilli(buffer.readLong());
+            final short firstUnsignedByte = buffer.readUnsignedByte();
+
+            logger.info(
+                    "Got the following data: %n FirstUnsignedInteger :: %d%n SecondUnsignedInteger :: %d%n readInstant :: %s%n FirstUnsignedByte :: 0x%02X",
+                    firstUnsignedInteger,
+                    secondUnsignedInteger, readInstant != null ? readInstant.toString() : "N/A", firstUnsignedByte);
         }
     }
 
-    public void invokeInboundCommandHandler(final InboundCommand command, final ByteBuf buffer) throws NoSuchMethodException,
+    public void invokeInboundCommandHandler(final InboundCommand command, final ByteBuf buffer)
+            throws NoSuchMethodException,
             IllegalAccessException, InvocationTargetException {
-        // Get all methods in the current class
-        final Method[] methods = this.getClass().getDeclaredMethods();
 
-        // Loop through all the methods
+        final Method[] methods = this.getClass().getDeclaredMethods();
         for (final Method method : methods) {
-            // Check if the method has the InboundCommandHandler annotation
             if (method.isAnnotationPresent(InboundCommandHandler.class)) {
-                // Get the annotation from the method
                 final InboundCommandHandler annotation = method.getAnnotation(InboundCommandHandler.class);
-                // Check if the annotation's value matches the given command
                 if (annotation.value() == command) {
-                    // Invoke the method with the arguments
                     method.invoke(this, buffer);
-                    // Return after invoking the first matching method found
                     return;
                 }
             }
         }
+
         // Throw an exception if no matching method was found
         logger.info("No method found for InboundCommand: %s. Discarding %d number of bytes!",
                 command.name(), buffer.capacity());
-
         throw new NoSuchMethodException("No method found for InboundCommand: " + command.name());
     }
 }

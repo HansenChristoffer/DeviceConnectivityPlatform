@@ -8,7 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import io.miso.core.InboundCommand;
-import io.miso.core.InboundCommandProcessor;
+import io.miso.core.processor.InboundCommandProcessor;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -35,7 +35,8 @@ public class TcpMessageHandler extends ChannelInboundHandlerAdapter {
                 ctx.writeAndFlush(msg);
             } else {
                 // Handle the case where the command is not recognized
-                logger.warn("Got message from %s, which had an unrecognized command with the id %d!", ctx.channel().remoteAddress(), cmdId);
+                logger.warn("Got message from %s, which had an unrecognized command with the id %d!",
+                        ctx.channel().remoteAddress(), cmdId);
                 ctx.close();
             }
         }

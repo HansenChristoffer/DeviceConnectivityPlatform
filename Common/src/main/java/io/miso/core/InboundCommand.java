@@ -4,15 +4,17 @@ import java.util.Arrays;
 import java.util.Optional;
 
 public enum InboundCommand {
-    IC_ACK(0x0000, true),
-    IC_PING(0x0001, true);
+    IC_ACK(0x0000, true, null),
+    IC_PING(0x0001, true, OutboundCommand.OC_PING);
 
     private final int id;
     private final boolean smsCapable;
+    private final OutboundCommand ackCommand;
 
-    InboundCommand(final int id, final boolean smsCapable) {
+    InboundCommand(final int id, final boolean smsCapable, final OutboundCommand ackCommand) {
         this.id = id;
         this.smsCapable = smsCapable;
+        this.ackCommand = ackCommand;
     }
 
     public static Optional<InboundCommand> getFromId(final int id) {
@@ -25,5 +27,9 @@ public enum InboundCommand {
 
     public boolean isSmsCapable() {
         return smsCapable;
+    }
+
+    public OutboundCommand getAckCommand() {
+        return ackCommand;
     }
 }

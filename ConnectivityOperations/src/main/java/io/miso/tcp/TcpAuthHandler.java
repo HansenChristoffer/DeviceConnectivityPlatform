@@ -3,6 +3,7 @@ package io.miso.tcp;
 import static io.miso.util.ConditionUtils.isNotNullAndNotEmpty;
 
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 import org.apache.logging.log4j.LogManager;
@@ -28,9 +29,8 @@ public class TcpAuthHandler extends ChannelDuplexHandler {
 
     public TcpAuthHandler() {
         final SecretConfig config = Configurator.getConfig(SecretConfig.class);
-
-        this.hmacKey = config.getHMAC_KEY().getBytes();
-        this.aesKey = config.getAES_KEY().getBytes();
+        this.hmacKey = config.getHMAC_KEY().getBytes(StandardCharsets.ISO_8859_1);
+        this.aesKey = config.getAES_KEY().getBytes(StandardCharsets.ISO_8859_1);
     }
 
     @Override
@@ -41,14 +41,11 @@ public class TcpAuthHandler extends ChannelDuplexHandler {
         try {
             if (msg instanceof final ByteBuf buffer) {
                 if ((isNotNullAndNotEmpty(hmacKey)) && (isNotNullAndNotEmpty(aesKey))) {
-                    final byte[] encryptedBytes = SecurityUtil.validateHMAC(BufferUtil.getArray(buffer), hmacKey);
+                    final byte[] encryptedBytes = Objects.requireNonNull(SecurityUtil.validateHMAC(BufferUtil.getArray(buffer), hmacKey), 
+                        "'encryptedBytes' is not allowed to be null, probably means that the message was invalid!");
 
-                    Objects.requireNonNull(encryptedBytes, "'encryptedBytes' is not allowed to be null, " +
-                            "probably means that the message was invalid!");
-
-                    final byte[] decryptedBytes = SecurityUtil.decrypt(encryptedBytes, aesKey);
-                    Objects.requireNonNull(decryptedBytes, "'decryptedBytes' is not allowed to be null, " +
-                            "probably means that the message was invalid!");
+                    final byte[] decryptedBytes = Objects.requireNonNull(SecurityUtil.decrypt(encryptedBytes, aesKey), 
+                        "'decryptedBytes' is not allowed to be null, probably means that the message was invalid!");
 
                     ctx.fireChannelRead(Unpooled.wrappedBuffer(decryptedBytes));
                 } else {
