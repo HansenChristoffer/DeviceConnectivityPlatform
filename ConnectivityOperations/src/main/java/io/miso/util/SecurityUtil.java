@@ -1,17 +1,19 @@
 package io.miso.util;
 
-import io.miso.exceptions.FailedDecryptionException;
-import io.miso.exceptions.FailedEncryptionException;
-import io.miso.exceptions.InvalidMessageException;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import java.util.Arrays;
 
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.util.Arrays;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import io.miso.exceptions.FailedDecryptionException;
+import io.miso.exceptions.FailedEncryptionException;
+import io.miso.exceptions.InvalidMessageException;
 
 public class SecurityUtil {
     private static final Logger logger = LogManager.getFormatterLogger();
@@ -24,15 +26,25 @@ public class SecurityUtil {
 
     public static byte[] encrypt(final byte[] data, final byte[] aesKey, final byte[] iv) {
         try {
+            logger.debug("This is the IV used when encrypting: %s", iv.length > 0 ? Arrays.toString(iv) : "N/A");
+
             final SecretKey secretKey = new SecretKeySpec(aesKey, ENCRYPT_ALGORITHM);
             final Cipher cipher = Cipher.getInstance(ENCRYPT_CIPHER);
             final IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
             cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivParameterSpec);
+
+            logger.debug("Data before encrypted: %s", data.length > 0 ? Arrays.toString(data) : "N/A");
+
             final byte[] encryptedData = cipher.doFinal(data);
+
+            logger.debug("Data after encrypted: %s", encryptedData.length > 0 ? Arrays.toString(encryptedData) : "N/A");
 
             final byte[] encryptedDataWithIV = new byte[encryptedData.length + iv.length];
             System.arraycopy(iv, 0, encryptedDataWithIV, 0, iv.length);
             System.arraycopy(encryptedData, 0, encryptedDataWithIV, iv.length, encryptedData.length);
+
+            logger.debug("Encrypted data with IV : %s",
+                    encryptedDataWithIV.length > 0 ? Arrays.toString(encryptedDataWithIV) : "N/A");
 
             return encryptedDataWithIV;
         } catch (final Exception e) {
@@ -47,6 +59,9 @@ public class SecurityUtil {
             final Cipher cipher = Cipher.getInstance(ENCRYPT_CIPHER);
             final byte[] iv = new byte[cipher.getBlockSize()];
             System.arraycopy(encryptedData, 0, iv, 0, iv.length);
+
+            logger.debug("This is the IV found when decrypting: %s", iv.length > 0 ? Arrays.toString(iv) : "EMPTY");
+
             final IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
             cipher.init(Cipher.DECRYPT_MODE, secretKey, ivParameterSpec);
 
@@ -63,15 +78,27 @@ public class SecurityUtil {
             mac.init(secretKey);
 
             final byte[] macBytes = mac.doFinal(data);
-            final byte[] retBytes = new byte[macBytes.length + data.length];
+            logger.debug("HMAC bytes: %s", macBytes.length > 0 ? Arrays.toString(macBytes) : "N/A");
 
-            System.arraycopy(macBytes, 0, retBytes, 0, macBytes.length);
-            System.arraycopy(data, 0, retBytes, macBytes.length, data.length);
-
-            return retBytes;
+            return macBytes;
         } catch (final Exception e) {
             throw new FailedEncryptionException("HMAC calculation error", e);
         }
+    }
+
+    public static byte[] addHMAC(final byte[] hmacBytes, final byte[] data) {
+        final byte[] retBytes = new byte[hmacBytes.length + data.length];
+
+        logger.debug("Message before adding calculated HMAC to it: %s",
+                data.length > 0 ? Arrays.toString(data) : "N/A");
+
+        System.arraycopy(hmacBytes, 0, retBytes, 0, hmacBytes.length);
+        System.arraycopy(data, 0, retBytes, hmacBytes.length, data.length);
+
+        logger.debug("Message after adding calculated HMAC to it: %s",
+                retBytes.length > 0 ? Arrays.toString(retBytes) : "N/A");
+
+        return retBytes;
     }
 
     public static byte[] validateHMAC(final byte[] dataWithHMAC, final byte[] hmacKey) {
@@ -85,9 +112,13 @@ public class SecurityUtil {
             final byte[] data = Arrays.copyOfRange(dataWithHMAC, hmacLength, dataWithHMAC.length);
             final byte[] actualHmac = mac.doFinal(data);
 
+            logger.debug("HMAC from validation: %s", expectedHmac.length > 0 ? Arrays.toString(expectedHmac) : "N/A");
+            logger.debug("Data without HMAC: %s", data.length > 0 ? Arrays.toString(data) : "N/A");
+
             if (!Arrays.equals(expectedHmac, actualHmac)) {
                 logger.error("HMAC mismatch. Expected: %s, Actual: %s",
-                        Arrays.toString(expectedHmac), Arrays.toString(actualHmac));
+                        Arrays.toString(expectedHmac) != null ? Arrays.toString(expectedHmac) : "N/A",
+                        Arrays.toString(actualHmac) != null ? Arrays.toString(actualHmac) : "N/A");
                 throw new InvalidMessageException("HMAC validation error");
             }
 

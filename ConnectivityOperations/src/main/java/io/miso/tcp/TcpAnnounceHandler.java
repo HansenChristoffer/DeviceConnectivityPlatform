@@ -1,15 +1,16 @@
 package io.miso.tcp;
 
+import java.net.InetSocketAddress;
+import java.util.Arrays;
+import java.util.Objects;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import io.miso.util.BufferUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import java.net.InetSocketAddress;
-import java.util.Arrays;
-import java.util.Objects;
 
 public class TcpAnnounceHandler extends ChannelInboundHandlerAdapter {
     private static final Logger logger = LogManager.getFormatterLogger();
@@ -19,7 +20,7 @@ public class TcpAnnounceHandler extends ChannelInboundHandlerAdapter {
         Objects.requireNonNull(msg, String.format("%s 'msg' not allowed to be null in %s!",
                 msg.getClass().getSimpleName(), this.getClass().getSimpleName()));
 
-        if (msg instanceof ByteBuf buffer) {
+        if (msg instanceof final ByteBuf buffer) {
             logger.info("Connection from %s with data message %s", ctx.channel().remoteAddress(),
                     Arrays.toString(BufferUtil.getArray(buffer)));
 
@@ -34,4 +35,3 @@ public class TcpAnnounceHandler extends ChannelInboundHandlerAdapter {
         cause.printStackTrace();
     }
 }
-

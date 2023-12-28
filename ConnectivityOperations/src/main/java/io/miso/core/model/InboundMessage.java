@@ -1,9 +1,9 @@
 package io.miso.core.model;
 
+import java.time.Instant;
+
 import io.miso.core.InboundCommand;
 import io.netty.buffer.ByteBuf;
-
-import java.time.Instant;
 
 public class InboundMessage {
     private final Instant receivedAt = Instant.now();
@@ -42,17 +42,10 @@ public class InboundMessage {
         return payload;
     }
 
-    private void validate() {
-        // Validate this object!
-    }
-
     static class InboundHeader {
         private Long clusterId;
         private Long hubId;
         private Instant createdAt;
-
-        public InboundHeader() {
-        }
 
         public Long getClusterId() {
             return clusterId;
@@ -84,9 +77,6 @@ public class InboundMessage {
 
     static class InboundPayload {
         private byte[] payloadBytes;
-
-        public InboundPayload() {
-        }
 
         public byte[] getPayloadBytes() {
             return payloadBytes;

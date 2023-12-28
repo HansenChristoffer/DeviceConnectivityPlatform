@@ -1,19 +1,20 @@
 package io.miso;
 
-import io.miso.core.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import io.miso.core.Service;
 
 public class ConnectivityOperationsService implements Service {
     private static final Logger logger = LogManager.getFormatterLogger();
 
-    private final InboundTcpServerManager inboundTcpServerManager;
+    private final TcpServerManager inboundTcpServerManager;
 
     public ConnectivityOperationsService() {
-        inboundTcpServerManager = new InboundTcpServerManager();
+        inboundTcpServerManager = new TcpServerManager();
     }
 
-    public ConnectivityOperationsService(final InboundTcpServerManager inboundTcpServerManager) {
+    public ConnectivityOperationsService(final TcpServerManager inboundTcpServerManager) {
         this.inboundTcpServerManager = inboundTcpServerManager;
     }
 
